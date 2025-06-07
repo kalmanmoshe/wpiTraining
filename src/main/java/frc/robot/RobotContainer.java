@@ -4,11 +4,14 @@
 
 package frc.robot;
 
-import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.ElevatorCommands.ElevatorMagneticHoming;
+import frc.robot.commands.ElevatorCommands.ElevatorSetPosition;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -19,45 +22,20 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
-
+  private CommandPS5Controller drivercontroller = new CommandPS5Controller(0);
+  private ElevatorSubsystem elevator;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Configure the trigger bindings
+    elevator = new ElevatorSubsystem(Constants.ElevatorConstants.ElevatorConfiguration);
     configureBindings();
   }
-
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
   private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(m_exampleSubsystem));
+    // Configure the trigger bindings
+    drivercontroller.square().onTrue(new ElevatorMagneticHoming(elevator));
 
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
-  }
-
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    return Autos.exampleAuto(m_exampleSubsystem);
+    drivercontroller.L1().onTrue(new ElevatorSetPosition(elevator, Constants.ElevatorConstants.HEIGHT_LEVEL_1));
+    drivercontroller.L2().onTrue(new ElevatorSetPosition(elevator, Constants.ElevatorConstants.HEIGHT_LEVEL_2));
+    drivercontroller.R1().onTrue(new ElevatorSetPosition(elevator, Constants.ElevatorConstants.HEIGHT_LEVEL_3));
+    drivercontroller.R2().onTrue(new ElevatorSetPosition(elevator, Constants.ElevatorConstants.HEIGHT_LEVEL_4));
   }
 }
